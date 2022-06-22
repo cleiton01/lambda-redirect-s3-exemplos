@@ -1,0 +1,38 @@
+import json
+import re
+import random
+
+def lambda_handler(event, context):
+    experimentBucketName = 'testesiteestatico01.s3.amazonaws.com'
+    experimentBucketRegion = 'us-east-1'
+    print(event)
+    
+    request = event['headers']
+
+    path_blue = '/blue'
+    path_green = '/green'
+
+    uri = ''
+    request['origin']= {
+        's3': {
+            'authMethod': 'none',
+            'domainName': experimentBucketName,
+            'path': '/green/index.html',
+            'region': experimentBucketRegion    
+        }
+    }
+    
+    request['host'] = [{'key': 'host', 'value': experimentBucketName }];
+    #request['uri'] = '/green/index.html'
+    request['uri'] = ''
+    request['isBase64Encoded'] = 'false'
+    
+    #if (random.random() < 0.5):
+    #     uri = path_blue + "/index.html"
+    #else:
+    #    uri = path_green + "/index.html"
+        
+    print(request)
+    
+    #request['uri'] = uri
+    return request
