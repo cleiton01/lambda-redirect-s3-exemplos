@@ -1,0 +1,36 @@
+exports.redirect = async (event, s3, bucket_name, callback) => {
+  const request = event['headers'];
+  request[uri]='';
+  const uri = request.uri;
+
+    const params = {
+      Bucket: bucket_name,
+      Key: '/blue/index.html' // the slice removes the first / from the string
+    };
+
+    // this function returns an error when an object is not found (404)
+    await s3.headObject(params).promise().then((data) => {
+      callback(null, request);
+    }).catch((error) => {
+      const response = {
+        status: '301',
+        headers: {
+          location: [{
+            key: 'Location',
+            value: uri + '/',
+          }],
+        }
+      };
+
+      callback(null, response);
+    });
+  
+}
+
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
+
+exports.handler = async (event, context, callback) => {
+  const bucket_name = 'testesiteestatico01';
+  this.redirect(event, s3, bucket_name, callback);
+};
