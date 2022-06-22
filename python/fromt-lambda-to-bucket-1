@@ -1,0 +1,41 @@
+import json
+from boto3 import client as boto3_client
+from os import environ as os_environ
+import base64
+from urllib3 import PoolManager
+import random
+ 
+http = PoolManager()
+s3 = boto3_client('s3')
+ 
+def lambda_handler(event, context):
+   try:
+       if (random.random() < 0.5):
+            url = f"http://testesiteestatico01.s3-website-us-east-1.amazonaws.com/green/index.html"
+       else:
+            url = f"http://testesiteestatico01.s3-website-us-east-1.amazonaws.com/blue/index.html"
+       
+       headers = event['headers']
+       headers.pop("host")
+ 
+       body = event['body']
+       http_method = event["httpMethod"]
+       r = http.request(http_method, url, headers=headers, body=body)
+       print(r.data)
+       try:
+           decoded_response = base64.b64encode(r.data).decode('utf-8')
+       except:
+           decoded_response =  base64.b64encode(r.data)
+       print(decoded_response) 
+       return {
+           'statusCode': 200,
+           'body': decoded_response,
+           "headers": dict(r.headers),
+           "isBase64Encoded": True
+       }
+       
+   except Exception as e:
+       print(e)
+       return {
+         'statusCode': 400
+       }
